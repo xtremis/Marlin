@@ -60,7 +60,7 @@
 static servo_t servos[MAX_SERVOS];                          // static array of servo structures
 static volatile int8_t Channel[_Nbr_16timers ];             // counter for the servo being pulsed for each timer (or -1 if refresh interval)
 
-uint8_t ServoCount = 0;                                     // the total number of attached servos
+uint8_t ServoCount = 4;                                     // the total number of attached servos
 
 
 // convenience macros

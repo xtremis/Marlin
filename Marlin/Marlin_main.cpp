@@ -408,6 +408,9 @@ void suicide()
 void servo_init()
 {
   #if (NUM_SERVOS >= 1) && defined(SERVO0_PIN) && (SERVO0_PIN > -1)
+    SERIAL_ECHO_START;
+    SERIAL_ECHO(" Attaching servo 0 to PIN ");
+    SERIAL_ECHO(SERVO0_PIN);
     servos[0].attach(SERVO0_PIN);
   #endif
   #if (NUM_SERVOS >= 2) && defined(SERVO1_PIN) && (SERVO1_PIN > -1)
@@ -553,6 +556,7 @@ void get_command()
 {
   while( MYSERIAL.available() > 0  && buflen < BUFSIZE) {
     serial_char = MYSERIAL.read();
+    SERIAL_ECHO(serial_char);
     if(serial_char == '\n' ||
        serial_char == '\r' ||
        (serial_char == ':' && comment_mode == false) ||
@@ -1590,6 +1594,17 @@ void process_commands()
       break;
     }
   }
+  else if(code_seen('X'))
+  {
+    SERIAL_ECHO("Running X Command");
+    switch( (int)code_value() )
+    {
+      case 0:break;
+      case 1:break;
+      default:break;
+    }
+    return;
+  }
 
   else if(code_seen('M'))
   {
@@ -1624,6 +1639,12 @@ void process_commands()
     }
     break;
 #endif
+    case 3:
+        SERIAL_ECHO("Spindle Clockwise(ON)");
+        break;
+    case 5:
+        SERIAL_ECHO("Spindle(OFF)");
+        break;  
     case 17:
         LCD_MESSAGEPGM(MSG_NO_MOVE);
         enable_x();
@@ -2460,14 +2481,12 @@ void process_commands()
         if (code_seen('S')) {
           servo_position = code_value();
           if ((servo_index >= 0) && (servo_index < NUM_SERVOS)) {
-#if defined (ENABLE_AUTO_BED_LEVELING) && (PROBE_SERVO_DEACTIVATION_DELAY > 0)
-		      servos[servo_index].attach(0);
-#endif
+            SERIAL_ECHO_START;
+            SERIAL_ECHO("Attaching to servo ");
+            SERIAL_ECHO(servo_index);
+            servos[servo_index].attach(0);
             servos[servo_index].write(servo_position);
-#if defined (ENABLE_AUTO_BED_LEVELING) && (PROBE_SERVO_DEACTIVATION_DELAY > 0)
-              delay(PROBE_SERVO_DEACTIVATION_DELAY);
-              servos[servo_index].detach();
-#endif
+            servos[servo_index].detach();
           }
           else {
             SERIAL_ECHO_START;

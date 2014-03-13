@@ -1,3 +1,5 @@
+This fork is to support using the Ramps1.4 and RC brushless motor for engraving/milling.  Added spindle control (M3 and M5).
+
 ==========================
 Marlin 3D Printer Firmware
 ==========================
