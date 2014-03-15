@@ -85,6 +85,8 @@
 // M Codes
 // M0   - Unconditional stop - Wait for user to press a button on the LCD (Only if ULTRA_LCD is enabled)
 // M1   - Same as M0
+// M3   - Start spindle (CW)
+// M5   - Stop Spindle
 // M17  - Enable/Power all stepper motors
 // M18  - Disable all stepper motors; same as M84
 // M20  - List SD card
