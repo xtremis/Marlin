@@ -409,39 +409,14 @@ void suicide()
 
 void servo_init()
 {
-  #if (NUM_SERVOS >= 1) && defined(SERVO0_PIN) && (SERVO0_PIN > -1)
     SERIAL_ECHO_START;
-    SERIAL_ECHO(" Attaching servo 0 to PIN ");
-    SERIAL_ECHO(SERVO0_PIN);
+    SERIAL_ECHOLN(" Initializing SERVO on pin ");
+    SERIAL_ECHOLN(SERVO0_PIN);
     servos[0].attach(SERVO0_PIN);
-  #endif
-  #if (NUM_SERVOS >= 2) && defined(SERVO1_PIN) && (SERVO1_PIN > -1)
-    servos[1].attach(SERVO1_PIN);
-  #endif
-  #if (NUM_SERVOS >= 3) && defined(SERVO2_PIN) && (SERVO2_PIN > -1)
-    servos[2].attach(SERVO2_PIN);
-  #endif
-  #if (NUM_SERVOS >= 4) && defined(SERVO3_PIN) && (SERVO3_PIN > -1)
-    servos[3].attach(SERVO3_PIN);
-  #endif
-  #if (NUM_SERVOS >= 5)
-    #error "TODO: enter initalisation code for more servos"
-  #endif
-
-  // Set position of Servo Endstops that are defined
-  #ifdef SERVO_ENDSTOPS
-  for(int8_t i = 0; i < 3; i++)
-  {
-    if(servo_endstops[i] > -1) {
-      servos[servo_endstops[i]].write(servo_endstop_angles[i * 2 + 1]);
-    }
-  }
-  #endif
-
-  #if defined (ENABLE_AUTO_BED_LEVELING) && (PROBE_SERVO_DEACTIVATION_DELAY > 0)
-  delay(PROBE_SERVO_DEACTIVATION_DELAY);
-  servos[servo_endstops[Z_AXIS]].detach();
-  #endif
+    servos[0].write(0);
+    servos[0].write(180);
+    servos[0].write(0);
+    servos[0].detach();
 }
 
 void setup()
@@ -1642,10 +1617,29 @@ void process_commands()
     break;
 #endif
     case 3:
-        SERIAL_ECHO("Spindle Clockwise(ON)");
+      {
+        int actual_speed = 0;
+        SERIAL_ECHOLN("Spindle Clockwise(ON)");
+        if(!servos[0].attached())
+        {
+          servos[0].attach(SERVO0_PIN);
+          servos[0].write(1000);
+          delay(2000);
+        }
+        if (code_seen('S')) {
+          SERIAL_ECHO("Spindle Speed: ");
+          actual_speed = int((code_value() / 18000UL) * 1000UL);
+          servos[0].write(1000 + actual_speed);
+          delay(1000);
+          SERIAL_ECHOLN(1000 + actual_speed);
+        }
+      }
         break;
     case 5:
         SERIAL_ECHO("Spindle(OFF)");
+        servos[0].attach(SERVO0_PIN);
+        servos[0].write(1000);
+        servos[0].detach();
         break;  
     case 17:
         LCD_MESSAGEPGM(MSG_NO_MOVE);
@@ -2486,9 +2480,12 @@ void process_commands()
             SERIAL_ECHO_START;
             SERIAL_ECHO("Attaching to servo ");
             SERIAL_ECHO(servo_index);
-            servos[servo_index].attach(0);
+            if(!servos[servo_index].attached())
+            {
+	      servos[servo_index].attach(11);
+            }
             servos[servo_index].write(servo_position);
-            servos[servo_index].detach();
+            delay(4000);
           }
           else {
             SERIAL_ECHO_START;
